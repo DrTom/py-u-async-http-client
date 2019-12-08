@@ -107,10 +107,16 @@ async def request(req):
     logger.debug(req)
     try:
         sr, sw = await open_conn(req)
-        await send_req(sw,req)
-        resp = await get_resp(sr, req)
-        await close_conn(sr, sw)
-        return resp
+        try:
+            await send_req(sw,req)
+            resp = await get_resp(sr, req)
+            return resp
+        except Exception as ex:
+            return {"status":{"code":900},
+                    "send/rec error ": ex}
+        finally:
+            await close_conn(sr, sw)
     except Exception as ex:
         return {"status":{"code":900},
-                "exception": ex}
+                "connection error ": ex}
+
